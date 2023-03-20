@@ -1,24 +1,26 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
+
+import { addContact } from 'redux/functionsContacts';
+import { selectContacts } from 'redux/selectors';
 
 import css from './AddContacts.module.css';
 
 function AddContacts() {
-  const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
   const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const contacts = useSelector(selectContacts);
+  const dispatch = useDispatch();
 
   const handleChange = e => {
-    const { name, value } = e.currentTarget;
+    const { name, value } = e.target;
     switch (name) {
       case 'name':
         setName(value);
         break;
-      case 'number':
-        setNumber(value);
+      case 'phone':
+        setPhone(value);
         break;
       default:
         return;
@@ -34,14 +36,17 @@ function AddContacts() {
     if (nameVerification) {
       alert(`${name} is already in contacts!`);
     } else {
-      dispatch(addContact(name, number));
+      const newContact = { name, phone };
+      dispatch(addContact(newContact));
+      setIsLoading(true);
     }
     resetForm();
+    setIsLoading(false);
   };
 
   const resetForm = () => {
     setName('');
-    setNumber('');
+    setPhone('');
   };
 
   return (
@@ -64,15 +69,15 @@ function AddContacts() {
         <input
           className={css.input}
           type="tel"
-          name="number"
-          value={number}
+          name="phone"
+          value={phone}
           onChange={handleChange}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
         />
       </label>
-      <button className={css.btn} type="submit">
+      <button className={css.btn} type="submit" disabled={isLoading}>
         Add contact
       </button>
     </form>
